@@ -169,6 +169,6 @@ Traceback:
     (1) ERROR (id:0x404080) - division_by_zero.c:37 - I can't divide by zero!
 ```
 
-**Listing 2.2.** Output of the example program "division_by_zero".
+**Listing 2.3.** Output of the example program "division_by_zero".
 
 To remove all generated files, run `make sclean`.
