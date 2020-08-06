@@ -1,6 +1,6 @@
 #include <string.h>
 
-#define TB_VERSION "0.1.0"
+#define TB_VERSION "0.1.1"
 
 struct _ERROR_STRUCT;
 typedef struct _ERROR_STRUCT TB_ERROR_TYPE;

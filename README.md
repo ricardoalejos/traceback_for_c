@@ -12,12 +12,25 @@ Consider that we have a function `complex_operation()` which divides the sum of 
 
 A traditional approach is to use error codes. Assuming that we agree on using the return value of the functions to implement error codes, we could implement our application like in Listing 1.1.1.
 
+With this approach, the top-level function does not get but a numeric indicator that something bad happened during a call to `complex_operation()`. Moreover, even though the caller function may get the `CANNOT_DIVIDE` constant, it would have now way of knowing what originated that error. We know the reason would be a `DIVISION_BY_ZERO` because it is trivail in this example, but real applications may make it way more difficult to find the root cause.
+
+To find out the cause of the `CANNOT_DIVIDE` error, the tester/developer would have to get his hands dirty and perform an extra effort to find the origin of the problem somewhere in the call stack.
+
 ```c
+
+/* Possible return values */
 enum ERROR_CODES
 {
     SUCCESS,
-    DIVISION_BY_ZERO
+    DIVISION_BY_ZERO,
+    CANNOT_DIVIDE
 };
+
+
+enum ERROR_CODES sum(int a, int b, int * result);
+enum ERROR_CODES divide(int a, int b, int * result);
+enum ERROR_CODES complex_operation(int a, int b, int c, int * result);
+
 
 enum ERROR_CODES sum(int a, int b, int * result)
 {
@@ -44,7 +57,7 @@ enum ERROR_CODES complex_operation(int a, int b, int c, int * result)
     // Perform division
     feedback = divide(partial_result, c, result);
     if(feedback != SUCCESS)
-        return feedback;
+        return CANNOT_DIVIDE;
     return SUCCESS;
 }
 
@@ -76,9 +89,27 @@ In this example, if there is a division by zero in `divide()` while executing `c
 ```c
 #include "traceback.h"
 
-TB_ERROR_TYPE cannot_add = {.divide: "An error happened while adding."};
-TB_ERROR_TYPE division_by_zero = {.description: "I can't divide by zero!"};
-TB_ERROR_TYPE cannot_divide = {.divide: "An error happened while dividing."};
+/* Error definitions */
+
+TB_ERROR_TYPE cannot_add = {
+    .description = "An error happened while adding."
+};
+
+TB_ERROR_TYPE division_by_zero = {
+    .description = "I can't divide by zero!"
+};
+
+TB_ERROR_TYPE cannot_divide = {
+    .description = "An error happened while dividing."
+};
+
+/* Function declarations */
+
+TB_RETURN_TYPE add(int a, int b, int * result);
+TB_RETURN_TYPE divide(int a, int b, int * result);
+TB_RETURN_TYPE complex_operation(int a, int b, int c, int * result);
+
+/* Function definitions */
 
 TB_RETURN_TYPE add(int a, int b, int * result)
 {
@@ -89,7 +120,9 @@ TB_RETURN_TYPE add(int a, int b, int * result)
 TB_RETURN_TYPE divide(int a, int b, int * result)
 {
     if (b == 0)
+    {
         TB_FAIL_MACRO(division_by_zero, TB_NO_ERROR_VALUE);
+    }
     *result = a / b;
     TB_SUCCEED_MACRO();
 }
@@ -104,15 +137,14 @@ TB_RETURN_TYPE complex_operation(int a, int b, int c, int * result)
     TB_TEST_MACRO(divide(partial_addition, c, result), feedback, cannot_divide);
     TB_SUCCEED_MACRO();
 }
-
 ```
 
 **Listing 1.2.1.** A demonstration of how we approach error handling with the traceback list.
 
 
-# 2. Building and running the example
+# 2. Building and running the examples
 
-To build the example code ("examples/traceback_test.c"), run the commands in Listing 2.1. After compiling, we should be able to run the application by executing the file in the "./bin" folder. The output of the program should look like the text in Lising 2.2.
+To build the example code, run the commands in Listing 2.1. After compiling, we should be able to run the application by executing the file in the "./bin" folder. The output of the program should look like the text in Lising 2.2 and Listing 2.3.
 
 ```bash
 $ cmake .
@@ -128,6 +160,15 @@ Traceback:
     (1) ERROR (id:0x404060) - traceback_test.c:25 - Error A.
 ```
 
-**Listing 2.2.** Output of the example program.
+**Listing 2.2.** Output of the example program "traceback_test".
+
+```bash
+$ ./bin/division_by_zero
+Traceback:
+    (0) ERROR (id:0x4040a0) - division_by_zero.c:50 - An error happened while dividing.
+    (1) ERROR (id:0x404080) - division_by_zero.c:37 - I can't divide by zero!
+```
+
+**Listing 2.2.** Output of the example program "division_by_zero".
 
 To remove all generated files, run `make sclean`.

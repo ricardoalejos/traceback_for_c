@@ -29,6 +29,11 @@ add_executable(
     examples/traceback_test.c
 )
 
+add_executable(
+    division_by_zero
+    examples/division_by_zero.c
+)
+
 add_custom_target(
     sclean
     COMMAND rm
