@@ -74,13 +74,13 @@ Consider the same requirements that we had in our last example. However, now we 
 
 We have written the new implementation in Listing 1.2.1. There, we use a set of definitions which you can find in "include/traceback.h". Notice that we have taken the function return statements away, since they are part of the mechanism that allow us develop the traceback list:
 
-- `TB_FAIL_MACRO()` receives two parameters: the error which the current function should raise in that point of the code, and any error that may have caused it. When there are no causes that we wished to identify, we can just populate the second field with `TB_NO_ERROR_VALUE`.
+- `TB_FAIL_MACRO()` receives one parameter: the error which the current function should raise in that point of the code.
 - `TB_SUCCEED_MACRO()` exits the caller function without signaling any error.
 
-Functions that call other functions that return `TB_RETURN_TYPE` may run the `TB_TEST_MACRO()`, which receives the following parameters:
+Functions that call other functions that return `TB_RETURN_TYPE` may run the `TB_TEST_CUMULATIVE_MACRO()`, which receives the following parameters:
 
 - the call statement (e.g. `function_to_test(parameters)`),
-- a `TB_RETURN_TYPE` variable to temporally store the feedback of the called function, and
+- a `TB_RETURN_TYPE` variable (which is a pointer to `TB_ERROR_TYPE`) to temporally store the feedback of the called function, and
 - the error that should be appended to the traceback list if the called function returns an error.
 
 In this example, if there is a division by zero in `divide()` while executing `complex_operation()`, then the resulting value of `feedback` contains the information related to both errors: `cannot_divide` (from `complex_operation()`)
@@ -108,6 +108,7 @@ TB_ERROR_TYPE cannot_divide = {
 TB_RETURN_TYPE add(int a, int b, int * result);
 TB_RETURN_TYPE divide(int a, int b, int * result);
 TB_RETURN_TYPE complex_operation(int a, int b, int c, int * result);
+void show_error(TB_ERROR_TYPE * error);
 
 /* Function definitions */
 
@@ -121,7 +122,7 @@ TB_RETURN_TYPE divide(int a, int b, int * result)
 {
     if (b == 0)
     {
-        TB_FAIL_MACRO(division_by_zero, TB_NO_ERROR_VALUE);
+        TB_FAIL_MACRO(&division_by_zero);
     }
     *result = a / b;
     TB_SUCCEED_MACRO();
@@ -131,10 +132,21 @@ TB_RETURN_TYPE complex_operation(int a, int b, int c, int * result)
 {
     int partial_addition = 0;
     TB_RETURN_TYPE feedback;
+    
     // Perform addition
-    TB_TEST_MACRO(add(a, b, &partial_addition), feedback, cannot_add);
+    TB_TEST_CUMULATIVE_MACRO(
+        add(a, b, &partial_addition),
+        feedback,
+        &cannot_add
+    );
+
     // Perform division
-    TB_TEST_MACRO(divide(partial_addition, c, result), feedback, cannot_divide);
+    TB_TEST_CUMULATIVE_MACRO(
+        divide(partial_addition, c, result), 
+        feedback, 
+        &cannot_divide
+    );
+
     TB_SUCCEED_MACRO();
 }
 ```

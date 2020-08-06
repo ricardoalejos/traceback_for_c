@@ -22,7 +22,7 @@ TB_ERROR_TYPE error_b = {
 */
 TB_RETURN_TYPE function_a(void)
 {
-    TB_FAIL_MACRO(error_a, TB_NO_ERROR_VALUE);
+    TB_FAIL_MACRO(&error_a);
 }
 
 /* 
@@ -33,7 +33,7 @@ TB_RETURN_TYPE function_a(void)
 TB_RETURN_TYPE function_b(void)
 {
     TB_RETURN_TYPE feedback;
-    TB_TEST_MACRO(function_a(), feedback, error_b);
+    TB_TEST_CUMULATIVE_MACRO(function_a(), feedback, &error_b);
     TB_SUCCEED_MACRO();
 }
 

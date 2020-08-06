@@ -34,7 +34,7 @@ TB_RETURN_TYPE divide(int a, int b, int * result)
 {
     if (b == 0)
     {
-        TB_FAIL_MACRO(division_by_zero, TB_NO_ERROR_VALUE);
+        TB_FAIL_MACRO(&division_by_zero);
     }
     *result = a / b;
     TB_SUCCEED_MACRO();
@@ -44,10 +44,21 @@ TB_RETURN_TYPE complex_operation(int a, int b, int c, int * result)
 {
     int partial_addition = 0;
     TB_RETURN_TYPE feedback;
+    
     // Perform addition
-    TB_TEST_MACRO(add(a, b, &partial_addition), feedback, cannot_add);
+    TB_TEST_CUMULATIVE_MACRO(
+        add(a, b, &partial_addition),
+        feedback,
+        &cannot_add
+    );
+
     // Perform division
-    TB_TEST_MACRO(divide(partial_addition, c, result), feedback, cannot_divide);
+    TB_TEST_CUMULATIVE_MACRO(
+        divide(partial_addition, c, result), 
+        feedback, 
+        &cannot_divide
+    );
+
     TB_SUCCEED_MACRO();
 }
 
