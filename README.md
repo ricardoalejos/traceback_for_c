@@ -1,7 +1,7 @@
 
 # 1. Introduction
 
-A **traceback list** is the list of error descriptions which give a clue about where in the code an error has happened. Such lists allow us diving into the problem usually towards its root cause.
+A **traceback list** is the list of error descriptions which give a clue about where in the code an error has happened. Such lists allow us diving into the problem, and usually lead us towards the root cause of errors and bugs.
 
 Our implementation of traceback lists is not (nor pretends to be) perfect. Rather it should be taken as a source of inspiration to develop a more robust/custom error handling mechanism.
 
