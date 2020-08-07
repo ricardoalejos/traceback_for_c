@@ -1,18 +1,18 @@
 
 # 1. Introduction
 
-A **traceback list** is the list of error descriptions which give a clue about where in the code an error has happened. Such lists allow us diving into the problem, and usually lead us towards the root cause of errors and bugs.
+A **traceback list** is the list of error descriptions which give a clue about where in the code an error has happened. Such records allow us diving into the problem, and usually lead us towards the root cause of errors and bugs.
 
-Our implementation of traceback lists is not (nor pretends to be) perfect. Rather it should be taken as a source of inspiration to develop a more robust/custom error handling mechanism.
+Our implementation of traceback lists is not (nor pretends to be) perfect. Instead, it should be taken as a source of inspiration to develop a more robust/custom error handling mechanism.
 
 
 ## 1.1. Use case: the error-code approach
 
 Consider that we have a function `complex_operation()` which divides the sum of two numbers `a` and `b`, and divides the result by `c`. This function calls other two functions `sum()` and `divide()`. How would we deal with a possible division by zero?
 
-A traditional approach is to use error codes. Assuming that we agree on using the return value of the functions to implement error codes, we could implement our application like in Listing 1.1.1.
+A traditional approach is to use error codes. Assuming that we agree on using the return value of the functions to implement error codes, we could write our application like the one in Listing 1.1.1.
 
-With this approach, the top-level function does not get but a numeric indicator that something bad happened during a call to `complex_operation()`. Moreover, even though the caller function may get the `CANNOT_DIVIDE` constant, it would have now way of knowing what originated that error. We know the reason would be a `DIVISION_BY_ZERO` because it is trivail in this example, but real applications may make it way more difficult to find the root cause.
+With this approach, the caller of the `complex_operation()` function does not get but a numeric indicator that something went wrong. Moreover, even though the caller function may get the `CANNOT_DIVIDE` constant, it would have no way of knowing what originated that error. We know the reason would be a `DIVISION_BY_ZERO` because it is trivial in this example, but real applications may make it way more challenging to find the root cause.
 
 To find out the cause of the `CANNOT_DIVIDE` error, the tester/developer would have to get his hands dirty and perform an extra effort to find the origin of the problem somewhere in the call stack.
 
@@ -70,12 +70,12 @@ As we can see, the implementation of `complex_operation()` becomes long as we ad
 
 ## 1.2. Use case: our approach
 
-Consider the same requirements that we had in our last example. However, now we will introduce a set of tools that will make the code easier to write, and easier to read. Moreover, it now provides us with the traceback list which would allow us finding the root cause of the error fastly.
+Consider the same requirements that we had in our last example. However, now we will introduce a set of tools that will make the code easier to write and easier to read. Moreover, it now provides us with the traceback list, which would allow us finding the root cause of the error fastly.
 
-We have written the new implementation in Listing 1.2.1. There, we use a set of definitions which you can find in "include/traceback.h". Notice that we have taken the function return statements away, since they are part of the mechanism that allow us develop the traceback list:
+We have written the new implementation in Listing 1.2.1. There, we use a set of definitions which you can find in "include/traceback.h". Notice that we have taken the function return statements away since they are part of the mechanism that allows us to develop the traceback list:
 
 - `TB_FAIL_MACRO()` receives one parameter: the error which the current function should raise in that point of the code.
-- `TB_SUCCEED_MACRO()` exits the caller function without signaling any error.
+- `TB_SUCCEED_MACRO()` exits the caller function without signalling any error.
 
 Functions that call other functions that return `TB_RETURN_TYPE` may run the `TB_TEST_CUMULATIVE_MACRO()`, which receives the following parameters:
 
@@ -151,12 +151,12 @@ TB_RETURN_TYPE complex_operation(int a, int b, int c, int * result)
 }
 ```
 
-**Listing 1.2.1.** A demonstration of how we approach error handling with the traceback list.
+**Listing 1.2.1.** A demonstration of how we approach error-handling with the traceback list.
 
 
 # 2. Building and running the examples
 
-To build the example code, run the commands in Listing 2.1. After compiling, we should be able to run the application by executing the file in the "./bin" folder. The output of the program should look like the text in Lising 2.2 and Listing 2.3.
+To build the example code, run the commands in Listing 2.1. After compiling, we should be able to run the application by executing the file in the "./bin" folder. The output of the program should look like the text in Listing 2.2 and Listing 2.3.
 
 ```bash
 $ cmake .
