@@ -1,3 +1,6 @@
+#ifndef __TRACEBACK_H__
+#define __TRACEBACK_H__
+
 #include <string.h>
 
 #define TB_VERSION "0.1.2"
@@ -117,3 +120,6 @@ struct _ERROR_STRUCT {
     {                                                                       \
         TB_FAIL_MACRO(feedback_variable);                                   \
     }
+
+
+#endif
